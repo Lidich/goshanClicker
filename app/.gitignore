@@ -1,0 +1,90 @@
+# =====================================
+# Android / Gradle
+# =====================================
+.gradle/
+build/
+*/build/
+local.properties
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/.name
+.idea/compiler.xml
+.idea/gradle.xml
+.idea/misc.xml
+.idea/vcs.xml
+captures/
+outputs/
+generated/
+release/
+debug/
+*.iml
+
+# =====================================
+# Android Studio
+# =====================================
+*.apk
+*.ap_
+*.aab
+*.hprof
+*.log
+*.bak
+*.tmp
+*.orig
+*.rej
+*.swp
+*.swo
+*.DS_Store
+
+# =====================================
+# Gradle
+# =====================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+gradle-app.setting
+gradle.properties
+
+# =====================================
+# IntelliJ / Android Studio
+# =====================================
+.idea/
+*.iws
+*.ipr
+*.iml
+
+# =====================================
+# Python (Chaquopy)
+# =====================================
+*.pyc
+__pycache__/
+app/src/main/python/__pycache__/
+app/src/main/python/*.pyc
+app/src/main/python/.pytest_cache/
+venv/
+env/
+.venv/
+.pytest_cache/
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# =====================================
+# Protobuf / gRPC
+# =====================================
+*.pb.*
+*.proto~
+app/src/main/proto/generated/
+app/build/generated/
+build/generated/
+
+# =====================================
+# Misc
+# =====================================
+.DS_Store
+Thumbs.db
+.idea/deploymentTargetDropDown.xml

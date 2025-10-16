@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package gamebot;
+
+// Описание сервиса
+service GameBot {
+  rpc SendAction (Action) returns (ActionResponse);
+}
+
+// Описание запроса
+message Action {
+  float x = 1;
+  float y = 2;
+  int32 duration = 3;
+}
+
+// Описание ответа
+message ActionResponse {
+  string status = 1;
+}
