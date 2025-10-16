@@ -10,6 +10,7 @@ class ActionExecutor() {
 
     fun perform(x: Float, y: Float, duration: Int) {
 
+        /*
         // gRPC-запрос к Python-серверу
         val channel: ManagedChannel = ManagedChannelBuilder
             .forAddress("127.0.0.1", 50051)
@@ -39,5 +40,6 @@ class ActionExecutor() {
         } finally {
             channel.shutdown()
         }
+         */
     }
 }

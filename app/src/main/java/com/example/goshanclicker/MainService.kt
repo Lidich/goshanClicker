@@ -24,8 +24,8 @@ class MainService : Service() {
 
         // Однократный тестовый Action
         val intentAction = Intent(this, MyAccessibilityService::class.java).apply {
-            putExtra("x", 500f)
-            putExtra("y", 600f)
+            putExtra("x", 411f)
+            putExtra("y", 778f)
             putExtra("duration", 100)
         }
         startService(intentAction)
