@@ -9,10 +9,15 @@ import java.net.URL
 class ActionExecutor {
     public var status = false
 
+    companion object {
+        const val EMULATOR_URL = "http://10.0.2.16:5300/should-click"
+        const val MOBILE_URL = "http://127.0.0.1:5300/should-click"
+    }
+
     fun perform(x: Float, y: Float, duration: Int): Boolean {
         Thread {
             try {
-                val url = URL("http://10.0.2.16:5300/should-click")
+                val url = URL(MOBILE_URL)
                 val connection = url.openConnection() as HttpURLConnection
 
                 connection.requestMethod = "POST"
