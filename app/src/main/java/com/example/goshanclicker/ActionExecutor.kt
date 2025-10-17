@@ -1,45 +1,47 @@
 package com.example.goshanclicker
 
 import android.util.Log
-import gamebot.GameBotGrpc
-import gamebot.Gamebot
-import io.grpc.ManagedChannel
-import io.grpc.ManagedChannelBuilder
+import org.json.JSONObject
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 
-class ActionExecutor() {
+class ActionExecutor {
+    public var status = false
 
-    fun perform(x: Float, y: Float, duration: Int) {
+    fun perform(x: Float, y: Float, duration: Int): Boolean {
+        Thread {
+            try {
+                val url = URL("http://10.0.2.16:5300/should-click")
+                val connection = url.openConnection() as HttpURLConnection
 
-        /*
-        // gRPC-запрос к Python-серверу
-        val channel: ManagedChannel = ManagedChannelBuilder
-            .forAddress("127.0.0.1", 50051)
-            .usePlaintext()
-            .build()
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
 
-        try {
-            val stub = GameBotGrpc.newBlockingStub(channel)
+                val json = JSONObject().apply {
+                    put("x", x)
+                    put("y", y)
+                    put("duration", duration)
+                }
 
-            val request = Gamebot.Action.newBuilder()
-                .setX(x)
-                .setY(y)
-                .setDuration(duration)
-                .build()
+                OutputStreamWriter(connection.outputStream).use {
+                    it.write(json.toString())
+                }
 
-            //val response = stub.sendAction(request)
-            val response = Gamebot.ActionResponse.newBuilder()
-                .setStatus("success").build()
+                val responseCode = connection.responseCode
+                val response = connection.inputStream.bufferedReader().readText()
 
-            Log.i("ActionExecutor", "Ответ от сервера: ${response.status}")
+                if (response.contains("0")) status = true
 
-            // Выполняем клик через AccessibilityService
-            //service.performClick(x, y)
+                Log.i("ActionExecutor", "HTTP Response ($responseCode): $response")
 
-        } catch (e: Exception) {
-            Log.e("ActionExecutor", "Ошибка gRPC запроса: ${e.message}", e)
-        } finally {
-            channel.shutdown()
-        }
-         */
+            } catch (e: Exception) {
+                Log.e("ActionExecutor", "Ошибка HTTP запроса: ${e.message}", e)
+            }
+        }.start()
+
+        return true
     }
 }
+

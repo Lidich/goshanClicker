@@ -45,19 +45,31 @@ class MyAccessibilityService : AccessibilityService() {
             val y = it.getFloatExtra("y", -1f)
             val duration = it.getIntExtra("duration", 100)
             if (x >= 0 && y >= 0) {
-                executor?.perform(x, y, duration)
-                Log.i("MyAccessibilityService", "performed click $x $y")
-                performClickRepeated(x, y)
+                if (executor?.perform(x, y, duration) == true) {
+                    Log.i("MyAccessibilityService", "got respone do clicking")
+                    performClickRepeated(x, y)
+                } else {
+                    Log.i("MyAccessibilityService", "havent got response sosal")
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    fun performClickRepeated(x: Float, y: Float, repeat: Int = 10, delayMillis: Long = 1000L) {
+    fun performClickRepeated(x: Float,
+                             y: Float,
+                             repeat: Int = 10,
+                             delayMillis: Long = 200L,
+                             startDelay: Long = 10000L) {
         Thread {
+            Thread.sleep(startDelay)
             for (i in 1..repeat) {
-                performClick(x, y)
-                Log.i("ActionExecutor", "Клик #$i выполнен на [$x, $y]")
+                if (executor?.status == true) {
+                    performClick(x, y)
+                    Log.i("ActionExecutor", "Клик #$i выполнен на [$x, $y]")
+                } else {
+                    Log.i("ActionExecutor", "Клик #$i не выполнен на [$x, $y]")
+                }
                 Thread.sleep(delayMillis)
             }
         }.start()
