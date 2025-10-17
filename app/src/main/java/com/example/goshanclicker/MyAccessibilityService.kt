@@ -3,14 +3,14 @@ package com.example.goshanclicker
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.accessibilityservice.GestureDescription
-import android.content.Intent
 import android.graphics.Path
-import android.view.accessibility.AccessibilityEvent
 import android.util.Log
+import android.view.accessibility.AccessibilityEvent
+import org.json.JSONObject
 
 class MyAccessibilityService : AccessibilityService() {
 
-    private var executor: ActionExecutor? = null
+    private var running = true
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -22,56 +22,51 @@ class MyAccessibilityService : AccessibilityService() {
         }
 
         Log.i("AccessibilityService", "Service connected and configured")
+
+        // Запускаем поток обработки очереди
+        Thread {
+            while (running) {
+                try {
+                    // Берём ответ из очереди (ждём, если пусто)
+                    val response: JSONObject = ResponseQueue.queue.take()
+
+                    // Пример: сервер возвращает координаты x, y и duration
+                    //val x = response.optDouble("x", -1.0).toFloat()
+                    //val y = response.optDouble("y", -1.0).toFloat()
+                    val duration = response.optInt("duration", 100)
+
+                    //if (x >= 0 && y >= 0) {
+                    val x = 549F
+                    val y = 930F
+                    if (response != null) {
+                        Log.i("AccessibilityService", "Taken response do click $response")
+                        performClick(x, y, duration)
+                        Log.i("AccessibilityService", "Click performed at [$x, $y] with duration $duration")
+                    }
+
+                } catch (e: Exception) {
+                    Log.e("AccessibilityService", "Error processing response", e)
+                }
+            }
+        }.start()
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Можно реагировать на события, если нужно
+    override fun onAccessibilityEvent(event: android.view.accessibility.AccessibilityEvent?) {
+        // Реагировать на события не нужно
     }
 
     override fun onInterrupt() {}
 
-    fun performClick(x: Float, y: Float) {
+    override fun onDestroy() {
+        running = false
+        super.onDestroy()
+    }
+
+    private fun performClick(x: Float, y: Float, duration: Int = 100) {
         val path = Path().apply { moveTo(x, y) }
         val gesture = GestureDescription.Builder()
-            .addStroke(GestureDescription.StrokeDescription(path, 0, 100))
+            .addStroke(GestureDescription.StrokeDescription(path, 0, duration.toLong()))
             .build()
         dispatchGesture(gesture, null, null)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        executor = ActionExecutor()
-        intent?.let {
-            val x = it.getFloatExtra("x", -1f)
-            val y = it.getFloatExtra("y", -1f)
-            val duration = it.getIntExtra("duration", 100)
-            if (x >= 0 && y >= 0) {
-                if (executor?.perform(x, y, duration) == true) {
-                    Log.i("MyAccessibilityService", "got respone do clicking")
-                    performClickRepeated(x, y)
-                } else {
-                    Log.i("MyAccessibilityService", "havent got response sosal")
-                }
-            }
-        }
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    fun performClickRepeated(x: Float,
-                             y: Float,
-                             repeat: Int = 10,
-                             delayMillis: Long = 200L,
-                             startDelay: Long = 10000L) {
-        Thread {
-            Thread.sleep(startDelay)
-            for (i in 1..repeat) {
-                if (executor?.status == true) {
-                    performClick(x, y)
-                    Log.i("ActionExecutor", "Клик #$i выполнен на [$x, $y]")
-                } else {
-                    Log.i("ActionExecutor", "Клик #$i не выполнен на [$x, $y]")
-                }
-                Thread.sleep(delayMillis)
-            }
-        }.start()
     }
 }

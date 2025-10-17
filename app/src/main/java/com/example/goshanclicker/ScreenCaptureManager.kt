@@ -14,13 +14,14 @@ import android.util.Log
 
 class ScreenCaptureManager(private val projection: MediaProjection) {
 
-    var onFrameCaptured: ((Bitmap) -> Unit)? = null
     private var reader: ImageReader? = null
     private var display: VirtualDisplay? = null
     private var thread: HandlerThread? = null
     private var handler: Handler? = null
 
     fun start() {
+        Thread.sleep(10000)
+
         // Регистрация колбэка для MediaProjection
         projection.registerCallback(object : MediaProjection.Callback() {
             override fun onStop() {
@@ -64,9 +65,12 @@ class ScreenCaptureManager(private val projection: MediaProjection) {
                     )
                     bitmap.copyPixelsFromBuffer(buffer)
                     image.close()
-                    onFrameCaptured?.invoke(bitmap)
+
+                    // Кладём кадр в глобальную очередь
+                    Log.i("ScreenCaptureManager", "Кладём кадр ${bitmap.toBase64()}")
+                    FrameQueue.queue.offer(bitmap)
                 }
-                handler?.postDelayed(this, 100) // ~10 FPS
+                handler?.postDelayed(this, 200) // ~10 FPS
             }
         })
     }
