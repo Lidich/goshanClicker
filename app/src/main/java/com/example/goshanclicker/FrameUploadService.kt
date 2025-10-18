@@ -12,6 +12,11 @@ import java.net.URL
 
 class FrameUploadService : Service() {
 
+    companion object {
+        const val EMULATOR_URL = "http://10.0.2.16:5300/should-click"
+        const val MOBILE_URL = "http://127.0.0.1:5300/should-click"
+    }
+
     private var running = true
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -28,7 +33,7 @@ class FrameUploadService : Service() {
                         put("image", imageBase64)
                     }
 
-                    val url = URL("http://10.0.2.16:5300/should-click")
+                    val url = URL(MOBILE_URL)
                     val connection = url.openConnection() as HttpURLConnection
                     connection.requestMethod = "POST"
                     connection.setRequestProperty("Content-Type", "application/json")
