@@ -6,7 +6,7 @@ import android.accessibilityservice.GestureDescription
 import android.graphics.Path
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import org.json.JSONObject
+import com.example.goshanclicker.atomic.ResponseQueue
 
 class MyAccessibilityService : AccessibilityService() {
 
@@ -36,7 +36,7 @@ class MyAccessibilityService : AccessibilityService() {
                     if (response != null) {
                         Log.i("AccessibilityService", "Taken response do click if needed $response")
                         for (i in 0 until response.status.toInt()) {
-                            performClick(x, y, 5)
+                            performClick(x, y, 5, 50)
                             Log.i("AccessibilityService", "Click performed at [$x, $y] with COUNT $i response $response")
                         }
                     }
@@ -59,7 +59,8 @@ class MyAccessibilityService : AccessibilityService() {
         super.onDestroy()
     }
 
-    private fun performClick(x: Float, y: Float, duration: Int = 100) {
+    private fun performClick(x: Float, y: Float, duration: Int = 100, delayMs: Long = 0L) {
+        if (delayMs != 0L) Thread.sleep(delayMs)
         val path = Path().apply { moveTo(x, y) }
         val gesture = GestureDescription.Builder()
             .addStroke(GestureDescription.StrokeDescription(path, 0, duration.toLong()))

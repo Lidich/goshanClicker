@@ -1,6 +1,7 @@
-package com.example.goshanclicker
+package com.example.goshanclicker.atomic
 
 
+import com.example.goshanclicker.model.InputResponse
 import java.util.concurrent.ArrayBlockingQueue
 
 object ResponseQueue {

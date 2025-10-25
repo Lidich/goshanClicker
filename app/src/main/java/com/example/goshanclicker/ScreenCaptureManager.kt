@@ -11,6 +11,8 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
+import com.example.goshanclicker.atomic.FrameQueue
+import com.example.goshanclicker.model.InputRequest
 
 class ScreenCaptureManager(private val projection: MediaProjection) {
 
