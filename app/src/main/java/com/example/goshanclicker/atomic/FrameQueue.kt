@@ -7,7 +7,7 @@ object FrameQueue {
     private val queue = ArrayBlockingQueue<InputRequest>(1)
 
     fun set(request: InputRequest) {
-        queue.put(request)
+        queue.offer(request)
     }
 
     fun get(): InputRequest {

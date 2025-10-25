@@ -5,9 +5,11 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.IBinder
 import android.util.Log
+import com.example.goshanclicker.FrameUploadService.Companion.MOBILE_URL
 import com.example.goshanclicker.atomic.AppMetrics
 import com.example.goshanclicker.atomic.FrameQueue
 import com.example.goshanclicker.atomic.ResponseQueue
+import com.example.goshanclicker.model.InputRequest
 import com.example.goshanclicker.model.InputResponse
 import com.google.gson.Gson
 import org.json.JSONObject
@@ -31,50 +33,12 @@ class FrameUploadService : Service() {
         Thread {
             while (running) {
                 try {
-                    // Берём последний запрос (если есть)
                     val request = FrameQueue.get()
                     if (request == null) {
                         Thread.sleep(200)
                         continue
                     } else {
-                        // Преобразуем InputRequest → JSON
-                        val json = JSONObject().apply {
-                            put("image", request.image)
-                            request.msSinceClick?.let { put("ms_since_click", it) }
-                            request.timestamp?.let { put("timestamp", it) }
-                        }
-
-                        // Настраиваем соединение
-                        val url = URL(MOBILE_URL)
-                        val connection = (url.openConnection() as HttpURLConnection).apply {
-                            requestMethod = "POST"
-                            setRequestProperty("Content-Type", "application/json")
-                            doOutput = true
-                            connectTimeout = 5000
-                            readTimeout = 5000
-                        }
-
-                        // Отправляем JSON
-                        val elapsed = measureTimeMillis {
-                            OutputStreamWriter(connection.outputStream).use {
-                                it.write(json.toString())
-                            }
-
-                            val responseCode = connection.responseCode
-                            val responseText = connection.inputStream.bufferedReader().readText()
-
-                            Log.i("FrameUploadService", "HTTP Response ($responseCode): $responseText")
-
-                            val response = Gson().fromJson(responseText, InputResponse::class.java)
-                            ResponseQueue.set(response)
-                        }
-
-                        // Регистрируем метрику
-                        AppMetrics.recordRequestTime(elapsed)
-                        Log.i("FrameUploadService", "HTTP Response TIME ${AppMetrics.getAverageRequestTime()}" + "ms")
-
-                        // Очищаем очередь запросов, чтобы не отправлять повторно
-                        //FrameQueue.clear()
+                        sendFrameToServer(request)
                     }
                 } catch (e: Exception) {
                     Log.e("FrameUploadService", "Error sending frame", e)
@@ -104,6 +68,46 @@ class FrameUploadService : Service() {
             .setSmallIcon(android.R.drawable.ic_media_play)
             .build()
     }
+}
+
+private fun sendFrameToServer(request: InputRequest) {
+    // Преобразуем InputRequest → JSON
+    val json = JSONObject().apply {
+        put("image", request.image)
+        request.msSinceClick?.let { put("ms_since_click", it) }
+        request.timestamp?.let { put("timestamp", it) }
+    }
+
+    // Настраиваем соединение
+    val url = URL(MOBILE_URL)
+    val connection = (url.openConnection() as HttpURLConnection).apply {
+        requestMethod = "POST"
+        setRequestProperty("Content-Type", "application/json")
+        doOutput = true
+        connectTimeout = 5000
+        readTimeout = 5000
+    }
+
+    // Отправляем JSON
+    val elapsed = measureTimeMillis {
+        OutputStreamWriter(connection.outputStream).use {
+            it.write(json.toString())
+        }
+
+        val responseCode = connection.responseCode
+        val responseText = connection.inputStream.bufferedReader().readText()
+
+        Log.i("FrameUploadService", "HTTP Response ($responseCode): $responseText")
+
+        val response = Gson().fromJson(responseText, InputResponse::class.java)
+        ResponseQueue.set(response)
+    }
+
+    // Регистрируем метрику
+    AppMetrics.recordRequestTime(elapsed)
+    Log.i("FrameUploadService", "HTTP Response TIME ${AppMetrics.getAverageRequestTime()}" + "ms")
+
+    FrameQueue.clear()
 }
 
 fun Bitmap.toBase64(): String {
