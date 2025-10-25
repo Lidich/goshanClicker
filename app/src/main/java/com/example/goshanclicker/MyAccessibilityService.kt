@@ -36,7 +36,7 @@ class MyAccessibilityService : AccessibilityService() {
                     if (response != null) {
                         Log.i("AccessibilityService", "Taken response do click if needed $response")
                         for (i in 0 until response.status.toInt()) {
-                            performClick(x, y, 5, 50)
+                            performClick(x, y, 5, 500)
                             Log.i("AccessibilityService", "Click performed at [$x, $y] with COUNT $i response $response")
                         }
                     }

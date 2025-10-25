@@ -62,18 +62,32 @@ class ScreenCaptureManager(private val projection: MediaProjection) {
                     val pixelStride = planes[0].pixelStride
                     val rowStride = planes[0].rowStride
                     val rowPadding = rowStride - pixelStride * width
-                    val bitmap = Bitmap.createBitmap(
+
+                    // создаём полный bitmap
+                    val fullBitmap = Bitmap.createBitmap(
                         width + rowPadding / pixelStride, height,
                         Bitmap.Config.ARGB_8888
                     )
-                    bitmap.copyPixelsFromBuffer(buffer)
+                    fullBitmap.copyPixelsFromBuffer(buffer)
                     image.close()
+
+                    // Обрезка сверху и снизу
+                    val topCrop = 250     // пикселей сверху
+                    val bottomCrop = 1000  // пикселей снизу
+                    val croppedHeight = fullBitmap.height - topCrop - bottomCrop
+                    val bitmap = Bitmap.createBitmap(
+                        fullBitmap,
+                        80, 150,
+                        550,
+                        550
+                    )
+
                     val request = InputRequest(
                         image = bitmap.toBase64(),
                         msSinceClick = 1,
                         timestamp = System.currentTimeMillis()
                     )
-                    // Кладём кадр в глобальную очередь
+
                     Log.i("ScreenCaptureManager", "Кладём кадр ${bitmap.toBase64()}")
                     FrameQueue.set(request)
                 }
