@@ -1,5 +1,6 @@
 package com.example.goshanclicker.model
 
+import android.graphics.Bitmap
 import com.google.gson.annotations.SerializedName
 
 data class InputRequest(
@@ -10,5 +11,7 @@ data class InputRequest(
     val msSinceClick: Int? = null,
 
     @SerializedName("timestamp")
-    val timestamp: Long? = null
+    val timestamp: Long? = null,
+
+    val bitmap: Bitmap? = null
 )

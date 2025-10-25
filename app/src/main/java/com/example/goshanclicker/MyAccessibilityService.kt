@@ -6,6 +6,7 @@ import android.accessibilityservice.GestureDescription
 import android.graphics.Path
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.example.goshanclicker.atomic.ClickTimeStorage
 import com.example.goshanclicker.atomic.ResponseQueue
 
 class MyAccessibilityService : AccessibilityService() {
@@ -36,9 +37,11 @@ class MyAccessibilityService : AccessibilityService() {
                     if (response != null) {
                         Log.i("AccessibilityService", "Taken response do click if needed $response")
                         for (i in 0 until response.status.toInt()) {
-                            performClick(x, y, 5, 500)
+                            performClick(x, y, 5, 0)
                             Log.i("AccessibilityService", "Click performed at [$x, $y] with COUNT $i response $response")
                         }
+                        val storage = ClickTimeStorage()
+                        storage.setLastClickTime(System.currentTimeMillis())
                     }
 
                 } catch (e: Exception) {

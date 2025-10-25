@@ -1,0 +1,62 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.chaquo.python' version '16.1.0'
+}
+
+android {
+    namespace 'com.example.goshanclicker'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.example.goshanclicker'
+        minSdk 29
+        targetSdk 36
+        versionCode 1
+        versionName '1.0'
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+chaquopy {
+    defaultConfig {
+        pip {
+            install("Pillow")
+            install("numpy")
+        }
+    }
+    productFlavors { }
+    sourceSets {
+        sourceSets {
+            getByName("main") {
+                srcDir("src/main/python/portable")
+            }
+        }
+    }
+}
+
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+}

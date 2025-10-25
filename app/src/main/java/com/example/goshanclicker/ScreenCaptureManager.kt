@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
+import com.example.goshanclicker.atomic.ClickTimeStorage
 import com.example.goshanclicker.atomic.FrameQueue
 import com.example.goshanclicker.model.InputRequest
 
@@ -82,10 +83,13 @@ class ScreenCaptureManager(private val projection: MediaProjection) {
                         550
                     )
 
+                    val storage = ClickTimeStorage()
+
                     val request = InputRequest(
                         image = bitmap.toBase64(),
-                        msSinceClick = 1,
-                        timestamp = System.currentTimeMillis()
+                        msSinceClick = storage.millisSinceLastClick().toInt(),
+                        timestamp = System.currentTimeMillis(),
+                        bitmap = bitmap
                     )
 
                     Log.i("ScreenCaptureManager", "Кладём кадр ${bitmap.toBase64()}")
