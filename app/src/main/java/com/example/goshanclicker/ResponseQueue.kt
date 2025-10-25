@@ -1,9 +1,23 @@
 package com.example.goshanclicker
 
-import org.json.JSONObject
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
+
+import java.util.concurrent.ArrayBlockingQueue
 
 object ResponseQueue {
-    val queue: BlockingQueue<JSONObject> = LinkedBlockingQueue(20) // максимум 20 ответов
+    // Очередь с ёмкостью 1
+    private val queue = ArrayBlockingQueue<InputResponse>(1)
+
+    // Блокируется, если в очереди уже есть элемент
+    fun set(response: InputResponse) {
+        queue.put(response)
+    }
+
+    // Блокируется, если очередь пуста, пока не появится элемент
+    fun get(): InputResponse {
+        return queue.take()
+    }
+
+    fun clear() {
+        queue.clear()
+    }
 }

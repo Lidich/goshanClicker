@@ -28,20 +28,17 @@ class MyAccessibilityService : AccessibilityService() {
             while (running) {
                 try {
                     // Берём ответ из очереди (ждём, если пусто)
-                    val response: JSONObject = ResponseQueue.queue.take()
-
-                    // Пример: сервер возвращает координаты x, y и duration
-                    //val x = response.optDouble("x", -1.0).toFloat()
-                    //val y = response.optDouble("y", -1.0).toFloat()
-                    val duration = response.optInt("duration", 100)
+                    val response = ResponseQueue.get()
 
                     //if (x >= 0 && y >= 0) {
                     val x = 549F
                     val y = 930F
                     if (response != null) {
-                        Log.i("AccessibilityService", "Taken response do click $response")
-                        performClick(x, y, duration)
-                        Log.i("AccessibilityService", "Click performed at [$x, $y] with duration $duration")
+                        Log.i("AccessibilityService", "Taken response do click if needed $response")
+                        for (i in 0 until response.status.toInt()) {
+                            performClick(x, y, 5)
+                            Log.i("AccessibilityService", "Click performed at [$x, $y] with COUNT $i response $response")
+                        }
                     }
 
                 } catch (e: Exception) {

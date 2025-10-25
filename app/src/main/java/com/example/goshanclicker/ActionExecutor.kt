@@ -7,6 +7,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class ActionExecutor {
+
+    // TODO remove class
     public var status = false
 
     companion object {

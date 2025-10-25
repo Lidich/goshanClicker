@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.IBinder
 import android.util.Log
+import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -23,43 +24,62 @@ class FrameUploadService : Service() {
         startForeground(2, buildNotification())
 
         Thread {
-
             while (running) {
                 try {
-                    val bitmap: Bitmap = FrameQueue.queue.take()
-                    val imageBase64 = bitmap.toBase64()
-
-                    val json = JSONObject().apply {
-                        put("image", imageBase64)
+                    // Берём последний запрос (если есть)
+                    val request = FrameQueue.get()
+                    if (request == null) {
+                        Thread.sleep(200)
+                        continue
                     }
 
+                    // Преобразуем InputRequest → JSON
+                    val json = JSONObject().apply {
+                        put("image", request.image)
+                        request.msSinceClick?.let { put("ms_since_click", it) }
+                        request.timestamp?.let { put("timestamp", it) }
+                    }
+
+                    // Настраиваем соединение
                     val url = URL(MOBILE_URL)
-                    val connection = url.openConnection() as HttpURLConnection
-                    connection.requestMethod = "POST"
-                    connection.setRequestProperty("Content-Type", "application/json")
-                    connection.doOutput = true
+                    val connection = (url.openConnection() as HttpURLConnection).apply {
+                        requestMethod = "POST"
+                        setRequestProperty("Content-Type", "application/json")
+                        doOutput = true
+                        connectTimeout = 5000
+                        readTimeout = 5000
+                    }
 
-                    OutputStreamWriter(connection.outputStream).use { it.write(json.toString()) }
+                    // Отправляем JSON
+                    OutputStreamWriter(connection.outputStream).use {
+                        it.write(json.toString())
+                    }
 
+                    // Читаем ответ
                     val responseCode = connection.responseCode
                     val responseText = connection.inputStream.bufferedReader().readText()
+
                     Log.i("FrameUploadService", "HTTP Response ($responseCode): $responseText")
 
-                    // Кладём ответ в очередь
-                    val responseJson = JSONObject().apply {
-                        put("response", responseText)
-                        put("code", responseCode)
-                    }
-                    if (responseJson.toString().contains("1")) ResponseQueue.queue.offer(responseJson)
+                    // Создаём объект ответа
+                    val response = Gson().fromJson(responseText, InputResponse::class.java)
+
+                    // Кладём ответ в ResponseQueue
+                    ResponseQueue.set(response)
+
+                    // Очищаем очередь запросов, чтобы не отправлять повторно
+                    //FrameQueue.clear()
 
                 } catch (e: Exception) {
                     Log.e("FrameUploadService", "Error sending frame", e)
+                    Thread.sleep(1000)
                 }
             }
         }.start()
 
         return START_STICKY
     }
+
 
     override fun onDestroy() {
         running = false

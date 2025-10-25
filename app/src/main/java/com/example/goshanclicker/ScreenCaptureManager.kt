@@ -52,6 +52,7 @@ class ScreenCaptureManager(private val projection: MediaProjection) {
         // Постинг рендер-цикла
         handler?.post(object : Runnable {
             override fun run() {
+
                 val image = reader?.acquireLatestImage()
                 if (image != null) {
                     val planes = image.planes
@@ -65,10 +66,14 @@ class ScreenCaptureManager(private val projection: MediaProjection) {
                     )
                     bitmap.copyPixelsFromBuffer(buffer)
                     image.close()
-
+                    val request = InputRequest(
+                        image = bitmap.toBase64(),
+                        msSinceClick = 1,
+                        timestamp = System.currentTimeMillis()
+                    )
                     // Кладём кадр в глобальную очередь
                     Log.i("ScreenCaptureManager", "Кладём кадр ${bitmap.toBase64()}")
-                    FrameQueue.queue.offer(bitmap)
+                    FrameQueue.set(request)
                 }
                 handler?.postDelayed(this, 200) // ~10 FPS
             }

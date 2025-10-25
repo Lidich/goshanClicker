@@ -1,9 +1,19 @@
 package com.example.goshanclicker
 
-import android.graphics.Bitmap
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ArrayBlockingQueue
 
 object FrameQueue {
-val queue: BlockingQueue<Bitmap> = LinkedBlockingQueue(10) // максимум 10 кадров
+    private val queue = ArrayBlockingQueue<InputRequest>(1)
+
+    fun set(request: InputRequest) {
+        queue.put(request)
+    }
+
+    fun get(): InputRequest {
+        return queue.take()
+    }
+
+    fun clear() {
+        queue.clear()
+    }
 }
